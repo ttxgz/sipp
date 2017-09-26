@@ -4,6 +4,14 @@ import csv
 
 from generatexml import *
 
+def ReadCSV(input):
+	sipp_msg_list = []
+	with open(input, newline='') as csvfile:
+		csv_reader = csv.reader(csvfile)
+		for entry in csv_reader:
+			sipp_msg_list.append(entry)
+	return sipp_msg_list
+
 if __name__ == "__main__":
 	# verify the python version. python3 is required.
 	version_major = sys.version_info[0]
@@ -20,9 +28,7 @@ if __name__ == "__main__":
 	input_file = args.input
 	output_file = args.output
 	
-	print("aaaaa")
-	testttxgz()
-	b = ReadCSV(input_file)
-	GenerateXML(glb.input_file, globals.output_ifle)
+	sip_msg_list = ReadCSV(input_file)
+	GenerateXML(sip_msg_list, output_file)
 
-	glb.logger.info("ALL DONE !")
+	#glb.logger.info("ALL DONE !")
