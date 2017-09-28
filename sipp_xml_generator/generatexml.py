@@ -7,27 +7,27 @@ from xml.etree import ElementTree
 TEMPLATE_DIR = 'template'
 EMPTY_TF = 'empty.xml'
 INVITE_TMPT = 'invite.xml'
+TMPT = 'template.xml'
 
-#def CDATA(text=None):
-#    element = etree.Element(CDATA)
-#    element.text = text
-#    return element
+def AppendComment(ele, txt):
+	cmt = Comment(txt)
+	cmt.tail = '\n'
+	ele.append(cmt)
+	return
 
-#class ElementTreeCDATA(etree.ElementTree):
-#    def _write(self, file, node, encoding, namespaces):
-#        if node.tag is CDATA:
-#            text = node.text.encode(encoding)
-#            file.write("\n<![CDATA[%s]]>\n" % text)
-#        else:
-#            etree.ElementTree._write(self, file, node, encoding, namespaces)
+def MakeCDATA(ele):
+	cdata_str = ele.text.split('\n', 1)[1].replace('\n', '<![CDATA[', 1) + ']]>'
+	cdata = Comment(' Generated CDATA -->\n' + cdata_str + '\n<!-- End of Generated CDATA ')
+	cdata.tail = '\n'
+	ele.append(cdata)
+	ele.text = ''
 
-def MakeCDATA(text):
-	return Comment(' Generated CDATA -->\n' + text.replace('\n', '<![CDATA[', 1) + ']]>\n<!-- End of Generated CDATA ')
-
-def GenINVITE(inv_msg, output_root):
-	tmplt_file = path.join(TEMPLATE_DIR, INVITE_TMPT)
-	doc = parse(tmplt_file)
-	root = doc.getroot()
+def GenINVITE(inv_msg, inv_tmplt, output_root):
+	#tmplt_file = path.join(TEMPLATE_DIR, INVITE_TMPT)
+	#doc = parse(tmplt_file)
+	#root = doc.getroot()
+	sends = inv_tmplt.findall('send')
+	send_sdp = sends[0]
 	# TODO: improve to a helper func to construct INVITE SDP
 	sdp_m = ''
 	sdp_media = []
@@ -39,36 +39,32 @@ def GenINVITE(inv_msg, output_root):
 		sdp_m = 'm=audio [media_port] RTP/AVP 8\n'
 		sdp_media.append('a=rtpmap:8 PCMA/8000\n')
 
-	send = root.find('send')
-	send_cdata = send.text
-	send_cdata = send_cdata.replace('[sdp_m]', sdp_m)
-	send_cdata = send_cdata.replace('[sdp_media]', '\n'.join(sdp_media))
+	send_sdp.text = send_sdp.text.replace('[sdp_m]', sdp_m)
+	send_sdp.text = send_sdp.text.replace('[sdp_media]', '\n'.join(sdp_media))
+	MakeCDATA(send_sdp)
 
-	#send.text = CDATA(send.text)
-	#send.append(Comment(' Generated CDATA -->\n<![CDATA[' + send_cdata.replace(']]>', ']]]]><![CDATA[>') + ']]>\n<!-- End of Generated CDATA '))
-	send.append(MakeCDATA(send_cdata))
-	send.text = ''
-	#send.append(send_cdata)
-	#send.text = ''
-	#send.text = MakeCDATA(send.text)
-	output_root.append(root)
+	# Convert CDATA in ACK
+	MakeCDATA(sends[1])
+
+	for child in inv_tmplt:
+		output_root.append(child)
+		output_root.append(test_cmt)
 	return
 
-def InsertXMLTag(sipp_msg, output_root):
-	#cmt = Comment(''.join(sipp_msg))
-	#root.append(cmt)
+def InsertXMLTag(sipp_msg, tmplt_root, output_root):
 	if (sipp_msg[0] == 'INVITE'):
-		GenINVITE(sipp_msg, output_root)
+		GenINVITE(sipp_msg, tmplt_root.find('invite'), output_root)
 	return
 
 def	GenerateXML(sipp_msg_list, output_file):
 	# open and create an initial xml doc
 	output_doc = parse(path.join(TEMPLATE_DIR, EMPTY_TF))
 	output_root = output_doc.getroot()
+	tmplt_root = parse(path.join(TEMPLATE_DIR, TMPT)).getroot()
 	# iterate every sipp msg and generate xml
 	for sipp_msg in sipp_msg_list:
-		InsertXMLTag(sipp_msg, output_root)
+		InsertXMLTag(sipp_msg, tmplt_root, output_root)
 	# write xml to output file
-	output_doc.write('output.xml')
+	output_doc.write('output.xml', 'ISO-8859-1', xml_declaration = True)
 	return True;
 
