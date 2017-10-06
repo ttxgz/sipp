@@ -1,0 +1,10 @@
+INVITE,PCMU,sipp
+PLAY,./avatar4_female_g711u.wav,PCMU,0
+CREATE_CONF,conf_log_id,3s
+JOIN_CONF,conf_log_id
+RECORDING,3s,dvcr,file://transient/[$client_sip_id]_placeholder.wav
+WAIT,3000
+PLAYBACK,conf:conf_0,file://transient/placeholder.wav
+WAIT,3000
+BYE
+

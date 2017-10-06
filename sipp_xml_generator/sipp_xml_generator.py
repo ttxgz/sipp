@@ -27,6 +27,8 @@ if __name__ == "__main__":
 
 	input_file = args.input
 	output_file = args.output
+	if (output_file == 'sipp.xml' and input_file != 'input.csv'):
+		output_file = input_file.split('.')[0] + '.xml'
 	
 	sip_msg_list = ReadCSV(input_file)
 	GenerateXML(sip_msg_list, output_file)
