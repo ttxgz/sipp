@@ -4,5 +4,4 @@ CREATE_CONF,conf_0,4s
 JOIN_CONF,conf_0
 RECORDING,5s,dvcr,file://transient/placeholder.wav
 PLAYBACK,conf:conf_0,file://transient/placeholder.wav
-WAIT,50000
-BYE
+INFO_OR_REINVITE

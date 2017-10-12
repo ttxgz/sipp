@@ -1,8 +1,24 @@
 <template>
 <invite>
-  <send>
+<nop display="INVITE (client) connection:"/>
+<nop>
+  <action>
+    <assignstr assign_to="sdp_v" value="v=0"/>
+    <assignstr assign_to="sdp_o" value="o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip]"/>
+    <assignstr assign_to="sdp_s" value="s=-"/>
+    <assignstr assign_to="sdp_c" value="c=IN IP[media_ip_type] [media_ip]"/>
+    <assignstr assign_to="sdp_t" value="t=0 0"/>
+    <assignstr assign_to="sdp_m" value="0"/>
+    <assignstr assign_to="sdp_a" value="a=rtpmap:0 PCMU/8000"/>
+    <assignstr assign_to="sdp" value="[$sdp_v]\n[$sdp_o]\n[$sdp_c]\n[$sdp_s]\n[$sdp_t]\nm=audio [media_port] RTP/AVP [$sdp_m]\n[$sdp_a]"/>
+    <assignstr assign_to="sdp_invite" value=""/>
+    <assignstr assign_to="sdp_ack" value=""/>
+  </action>
+</nop>
+
+  <send start_rtd="invite">
     <![CDATA[
-  
+
       INVITE sip:[service]@[remote_ip]:[remote_port] SIP/2.0
       Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
       From: sipp <sip:[uri_user]@[local_ip]:[local_port]>;tag=[call_number]
@@ -11,43 +27,113 @@
       CSeq: [cseq] INVITE
       Contact: sip:sipp@[local_ip]:[local_port]
       Max-Forwards: 70
-      X-DolbyVoice-Client-LogId: sipp_client_0
+      X-DolbyVoice-Client-LogId: [log_id]
       Subject: Performance Test
       Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, SUBSCRIBE, NOTIFY, REFER, UPDATE, REGISTER, INFO
-      Require: timer
-      Supported: timer, 100rel
-      Session-Expires: 3600;refresher=uac
+      Supported: 100rel
+      Session-Expires: 90;refresher=uas
       Content-Type: application/sdp
       Content-Length: [len]
-  
-      v=0
-      o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip]
-      s=-
-      c=IN IP[media_ip_type] [media_ip]
-      t=0 0
-      [sdp_m]
-      [sdp_media]
-  
+
+      [$sdp_invite]
+
     ]]>
   </send>
-  
+
   <recv response="100"
         optional="true">
   </recv>
-  
+
   <recv response="180" optional="true">
   </recv>
-  
-  <recv response="200" rtd="true">
+
+  <recv response="200" rtd="invite">
     <action>
     	<ereg regexp="tag=\s*(\S*)"  
    			  search_in="hdr" header = "To:"  
    			  assign_to="unused,client_sip_id"/>
     </action>
   </recv>
-  
-  <Reference variables = "unused"/>
+
+  <Reference variables = "unused,client_sip_id"/>
+  <send crlf="true">
+    <![CDATA[
+
+      ACK sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: sipp <sip:sipp@[local_ip]:[local_port]>;tag=[call_number]
+      To: sut <sip:[service]@[remote_ip]:[remote_port]>[peer_tag_param]
+      Call-ID: [call_id]
+      CSeq: [cseq] ACK
+      Contact: sip:sipp@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Subject: Performance Test
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      [$sdp_ack]
+
+    ]]>
+  </send>
+
+</invite>
+
+<invite_conf_leg>
+<nop display="INVITE (conf control leg) connection:"/>
+
+<nop>
+  <action>
+    <assignstr assign_to="sdp_v" value="v=0"/>
+    <assignstr assign_to="sdp_o" value="o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip]"/>
+    <assignstr assign_to="sdp_s" value="s=Conference Control Leg"/>
+    <assignstr assign_to="sdp_c" value="c=IN IP[media_ip_type] [media_ip]"/>
+    <assignstr assign_to="sdp_t" value="t=0 0"/>
+    <assignstr assign_to="sdp_a" value="a=sendrecv"/>
+    <assignstr assign_to="sdp" value="[$sdp_v]\n[$sdp_o]\n[$sdp_c]\n[$sdp_s]\n[$sdp_t]\n[$sdp_a]"/>
+  </action>
+</nop>
+
   <send>
+    <![CDATA[
+
+      INVITE sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: sipp <sip:sipp@[local_ip]:[local_port]>;tag=[call_number]
+      To: sut <sip:[service]@[remote_ip]:[remote_port]>
+      Call-ID: [call_id]
+      CSeq: [cseq] INVITE
+      Contact: sip:sipp@[local_ip]:[local_port]
+      Max-Forwards: 70
+      X-DolbyVoice-Client-LogId: [log_id]
+      Subject: Performance Test
+      Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, SUBSCRIBE, NOTIFY, REFER, UPDATE, REGISTER, INFO
+      Supported: 100rel
+      Session-Expires: 90;refresher=uas
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      [$sdp]
+
+    ]]>
+  </send>
+
+  <recv response="100"
+        optional="true">
+  </recv>
+
+  <recv response="180" optional="true">
+  </recv>
+
+  <recv response="200" rtd="true">
+    <action>
+    	<ereg regexp="tag=\s*(\S*)"  
+   			  search_in="hdr" header = "To:"  
+   			  assign_to="unused,client_conf_id"/>
+    </action>
+  </recv>
+  
+  <Reference variables = "unused,client_conf_id"/>
+  <send crlf="true">
     <![CDATA[
   
       ACK sip:[service]@[remote_ip]:[remote_port] SIP/2.0
@@ -60,15 +146,15 @@
       Max-Forwards: 70
       Subject: Performance Test
       Content-Length: 0
-  
+
     ]]>
   </send>
 
-</invite>
+</invite_conf_leg>
 
 <play>
 
-  <nop display="play [wav_file]:">
+  <nop display="play [wav_file]:" crlf="true">
   <action>
       <exec rtp_stream="[wav_file], [repeat], [format]" />
   </action>
@@ -81,7 +167,7 @@
   <nop display="create [conf_id]:"/>
   <send >
        <![CDATA[
-  
+
         INFO sip:[service]@[remote_ip]:[remote_port] SIP/2.0
         Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
         From: sipp <sip:sipp@[local_ip]:[local_port]>;tag=[call_number]
@@ -91,22 +177,21 @@
         Contact: sip:sipp@[local_ip]:[local_port]
         Accept: application/sdp, text/*, application/msml+xml, application/moml+xml
         Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, SUBSCRIBE, NOTIFY, REFER, UPDATE, REGISTER, INFO
-        Supported: timer, 100rel
+        Supported: 100rel
         Content-Type: application/msml+xml
         Content-Length: [len]
-  
+
         <msml version="1.1">
-          <createconference name="[conf_id]">
+          <createconference name="[conf_id]" deletewhen="nomedia">
             <audiomix>
               <asn ri="[ri]" />
               <n-loudest n="4" />
             </audiomix>
           </createconference>
         </msml>
-  
        ]]>
   </send>
-  <recv response="200"/>
+  <recv response="200" crlf="true"/>
 
 </create_conf>
 
@@ -115,7 +200,7 @@
   <nop display="join [conf_id]:"/>
   <send >
        <![CDATA[
-  
+
         INFO sip:[service]@[remote_ip]:[remote_port] SIP/2.0
         Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
         From: sipp <sip:sipp@[local_ip]:[local_port]>;tag=[call_number]
@@ -125,22 +210,26 @@
         Contact: sip:sipp@[local_ip]:[local_port]
         Accept: application/sdp, text/*, application/msml+xml, application/moml+xml
         Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, SUBSCRIBE, NOTIFY, REFER, UPDATE, REGISTER, INFO
-        Supported: timer, 100rel
+        Supported: 100rel
         Content-Type: application/msml+xml
         Content-Length: [len]
-  
+
         <msml version="1.1">
           <join id1="conn:[$client_sip_id]" id2="conf:[conf_id]">
-            <stream dir="to-id1" media="audio" dlb:echo_suppression="disable">
+            <stream dir="to-id1" media="audio" dlb:echo_suppression="disable" dlb:audio_processing="enable" dlb:fec="disable">
               <clamp dtmf="false" />
+              <gain amt="0" />
+            </stream>
+            <stream dir="from-id1" media="audio" dlb:jb_min_latency="0ms">
+              <clamp dtmf="true" />
               <gain amt="0" />
             </stream>
           </join>
         </msml>
-  
+
        ]]>
   </send>
-  <recv response="200"/>
+  <recv response="200" crlf="true"/>
 
 </join_conf>
 
@@ -159,18 +248,18 @@
       Contact: sip:sipp@[local_ip]:[local_port]
       Accept: application/sdp, text/*, application/msml+xml, application/moml+xml
       Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, SUBSCRIBE, NOTIFY, REFER, UPDATE, REGISTER, INFO
-      Supported: timer, 100rel
+      Supported: 100rel
       Content-Type: application/msml+xml
       Content-Length: [len]
 
       <msml version="1.1">
-     	<dialogstart target="conn:[$client_sip_id]" type="application/moml+xml" name="recordname">
-         <record dest="[record_file]" format="audio/[record_format]" maxtime="[record_dur]" prespeech="5s" postspeech="2s" termkey="#">
-     		<recordexit>
-     			<exit namelist="record.len" />
-     		</recordexit>
-	     </record>
- 		</dialogstart>
+        <dialogstart target="conn:[$client_sip_id]" type="application/moml+xml" name="recordname">
+          <record dest="[record_file]" format="audio/[record_format]" maxtime="[record_dur]" prespeech="5s" postspeech="2s" termkey="#">
+            <recordexit>
+              <exit namelist="record.len" />
+            </recordexit>
+          </record>
+        </dialogstart>
       </msml>
 
      ]]>
@@ -212,7 +301,7 @@
       Contact: sip:sipp@[local_ip]:[local_port]
       Accept: application/sdp, text/*, application/msml+xml, application/moml+xml
       Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, SUBSCRIBE, NOTIFY, REFER, UPDATE, REGISTER, INFO
-      Supported: timer, 100rel
+      Supported: 100rel
       Content-Type: application/msml+xml
       Content-Length: [len]
 
@@ -280,5 +369,92 @@
 <recv response="200" crlf="true"/>
 
 </bye>
+
+<reInvite_or_INFO>
+<label id="ReInviteLoop" />
+<nop display="wait for reInvite or INFO:" />
+
+<nop>
+  <action>
+    <assign assign_to="reinvite_loop_max" value="1"/>
+    <assign assign_to="reinvite_loop_cnt" value="1"/>
+    <assign assign_to="reinvite_loop_increment" value="0"/>
+    <test assign_to="IsEndOfReinviteLoop" variable="reinvite_loop_cnt" compare="greater_than" variable2="reinvite_loop_max"/>
+  </action>
+</nop>
+
+<label id="reInvite_or_INFO"/>
+<!-- jump to end the loop if needed-->
+<nop next="EndOfReInviteLoop" test="IsEndOfReinviteLoop">
+</nop>
+
+<recv request="INFO" optional="true" next="Send200">
+  <action>
+    <ereg regexp="(.*)"  
+      search_in="msg"  
+      assign_to="unused,received_sip_msg"/>
+    <log message="received conf control leg SIP INFO: [$received_sip_msg]"/>
+  </action>
+</recv>
+
+<recv request="INVITE" next="Send200Sdp">
+  <action>
+    <log message="received conf control leg SIP reInv"/>
+  </action>
+</recv>
+
+<label id="Send200Sdp"/>
+<send>
+  <![CDATA[
+
+    SIP/2.0 200 OK
+    [last_Via:]
+    [last_From:]
+    [last_To:]
+    [last_Call-ID:]
+    [last_CSeq:]
+    Contact: <sip:[local_ip]:[local_port];transport=[transport]>
+    Session-Expires: 90;refresher=uas
+    Content-Type: application/sdp
+    Content-Length: [len]
+
+    [$sdp]
+]]>
+</send>
+
+<recv next="reInvite_or_INFO" request="ACK">
+  <action>
+    <add assign_to="reinvite_loop_cnt" variable="reinvite_loop_increment"/>
+    <test assign_to="IsEndOfReinviteLoop" variable="reinvite_loop_cnt" compare="greater_than" variable2="reinvite_loop_max"/>
+  </action>
+</recv>
+
+
+<label id="Send200"/>
+<send next="reInvite_or_INFO" crlf="true">
+  <![CDATA[
+
+
+    SIP/2.0 200 OK
+    [last_Via:]
+    [last_From:]
+    [last_To:]
+    [last_Call-ID:]
+    [last_CSeq:]
+    Contact: <sip:[local_ip]:[local_port];transport=[transport]>
+    Content-Type: application/msml+xml
+    Content-Length: [len]
+
+    <?xml version="1.0"?>
+    <msml version="1.1">
+      <result response="200" />
+    </msml>
+]]>
+</send>
+<!-- end of the loop -->
+<label id="EndOfReInviteLoop"/>
+
+</reInvite_or_INFO>
+
 </template>
 

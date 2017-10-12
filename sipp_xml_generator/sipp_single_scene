@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo running sipp with $1.xml
+sleep 1
+#vm
+sipp -default_behaviors -bye -m 1 -l 1 -i 10.120.100.161 -p 5040 10.120.100.161:5090 -sf $1.xml -trace_msg -message_file $1.msg.log -trace_logs -log_file $1.log
+#win
+#sipp -default_behaviors -bye -m 1 -l 1 -i 10.120.100.161 -p 5040 10.120.100.233:5090 -sf $1.xml -trace_msg -message_file $1.msg.log -trace_err -error_file $1.err.log -trace_logs -log_file $1.log
+#sipp -default_behaviors -bye -m 1 -l 1 -i 10.120.100.161 -p 5040 10.120.100.161:5090 -aa -sf $1.xml -trace_msg -message_file $1.msg.log -trace_err -error_file $1.err.log -trace_logs -log_file $1.log -trace_stat -trace_rtt
+

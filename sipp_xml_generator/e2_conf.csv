@@ -1,4 +1,3 @@
-INVITE,PCMU,
-PLAY,./avatar4_female_g711u.wav,PCMU,4
-CREATE_CONF, conf_sipp_1
+INVITE_CONF
+CREATE_CONF,conf_1
 INFO_OR_REINVITE

@@ -1,8 +1,1 @@
-INVITE,PCMU,
-PLAY,./avatar4_female_g711u.wav,PCMU,4
-CREATE_CONF,conf_sipp_1,4s
-JOIN_CONF,conf_sipp_1
-RECORDING,5s,dvcr,file://transient/placeholder.wav
-PLAYBACK,conf:conf_0,file://transient/placeholder.wav
-WAIT,5000
-BYE
+INFO_OR_REINVITE

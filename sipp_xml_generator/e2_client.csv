@@ -1,7 +1,7 @@
 INVITE,PCMU,
-PLAY,./avatar4_female_g711u.wav,PCMU,4
+PLAY,./avatar4_female_g711u.wav,PCMU,-1
 RECORDING,3s,dvcr,file://transient/placeholder.wav
-JOIN_CONF,conf_sipp_1
-PLAYBACK,conf:conf_0,file://transient/placeholder.wav
-WAIT,5000
+JOIN_CONF,conf_1
+PLAYBACK,conf:conf_1,file://transient/placeholder.wav
+WAIT,50000
 BYE
